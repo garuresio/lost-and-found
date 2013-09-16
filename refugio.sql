@@ -229,6 +229,20 @@ COMMENT = 'Datos de registro de la mascota';
 
 
 -- -----------------------------------------------------
+-- Table `refugio`.`ess_estado_solicitud`
+-- -----------------------------------------------------
+DROP TABLE IF EXISTS `refugio`.`ess_estado_solicitud` ;
+
+CREATE TABLE IF NOT EXISTS `refugio`.`ess_estado_solicitud` (
+  `ess_id` INT NOT NULL,
+  `ess_estado` VARCHAR(20) NOT NULL COMMENT 'Estado de la solicitud',
+  `ess_descripcion` VARCHAR(45) NULL,
+  PRIMARY KEY (`ess_id`))
+ENGINE = InnoDB
+COMMENT = 'Estado de la solicitud';
+
+
+-- -----------------------------------------------------
 -- Table `refugio`.`sol_solicitud`
 -- -----------------------------------------------------
 DROP TABLE IF EXISTS `refugio`.`sol_solicitud` ;
@@ -246,11 +260,15 @@ CREATE TABLE IF NOT EXISTS `refugio`.`sol_solicitud` (
   `mun_sol_id` INT NOT NULL,
   `dep_sol_id` INT NOT NULL,
   `sol_telofic` CHAR(9) NULL COMMENT 'Telefono oficina del solicitante',
-  `sol_dui` CHAR(10) NULL COMMENT 'DUI del solicitante',
-  `sol_nit` CHAR(12) NULL COMMENT 'NIT del solicitante',
-  PRIMARY KEY (`sol_id`, `gen_sol_id`, `mun_sol_id`, `dep_sol_id`),
+  `sol_dui` CHAR(10) NOT NULL COMMENT 'DUI del solicitante',
+  `sol_nit` CHAR(12) NOT NULL COMMENT 'NIT del solicitante',
+  `sol_fnacimiento` VARCHAR(45) NULL COMMENT 'Fecha de nacimiento del solicitante',
+  `sol_email` VARCHAR(45) NULL COMMENT 'Correo del solicitante',
+  `ess_sol_id` INT NOT NULL,
+  PRIMARY KEY (`sol_id`, `gen_sol_id`, `mun_sol_id`, `dep_sol_id`, `ess_sol_id`),
   INDEX `fk_sol_solicitud_gen_genero1_idx` (`gen_sol_id` ASC),
   INDEX `fk_sol_solicitud_mun_municipio1_idx` (`mun_sol_id` ASC, `dep_sol_id` ASC),
+  INDEX `fk_sol_solicitud_ess_estado_solicitud1_idx` (`ess_sol_id` ASC),
   CONSTRAINT `fk_sol_solicitud_gen_genero1`
     FOREIGN KEY (`gen_sol_id`)
     REFERENCES `refugio`.`gen_genero` (`gen_id`)
@@ -260,9 +278,86 @@ CREATE TABLE IF NOT EXISTS `refugio`.`sol_solicitud` (
     FOREIGN KEY (`mun_sol_id` , `dep_sol_id`)
     REFERENCES `refugio`.`mun_municipio` (`mun_id` , `dep_mun_id`)
     ON DELETE NO ACTION
+    ON UPDATE NO ACTION,
+  CONSTRAINT `fk_sol_solicitud_ess_estado_solicitud1`
+    FOREIGN KEY (`ess_sol_id`)
+    REFERENCES `refugio`.`ess_estado_solicitud` (`ess_id`)
+    ON DELETE NO ACTION
     ON UPDATE NO ACTION)
 ENGINE = InnoDB
 COMMENT = 'Solicitud de adopción para una mascota';
+
+
+-- -----------------------------------------------------
+-- Table `refugio`.`esp_especializaciones`
+-- -----------------------------------------------------
+DROP TABLE IF EXISTS `refugio`.`esp_especializaciones` ;
+
+CREATE TABLE IF NOT EXISTS `refugio`.`esp_especializaciones` (
+  `esp_id` INT NOT NULL,
+  `esp_nombre` VARCHAR(45) NOT NULL COMMENT 'Nombre de la especialización',
+  `esp_descripcion` VARCHAR(100) NULL COMMENT 'Descripcion de la especialización',
+  PRIMARY KEY (`esp_id`))
+ENGINE = InnoDB
+COMMENT = 'Especializacion de un empleado';
+
+
+-- -----------------------------------------------------
+-- Table `refugio`.`emp_empleado`
+-- -----------------------------------------------------
+DROP TABLE IF EXISTS `refugio`.`emp_empleado` ;
+
+CREATE TABLE IF NOT EXISTS `refugio`.`emp_empleado` (
+  `emp_id` INT NOT NULL,
+  `emp_direccion` VARCHAR(100) NULL COMMENT 'Direccion del empleado',
+  `emp_tel_trabajo` CHAR(9) NOT NULL COMMENT 'Telefono de oficina del empleado',
+  `emp_email` VARCHAR(60) NOT NULL COMMENT 'Correo del empleado',
+  `emp_dui` CHAR(9) NOT NULL COMMENT 'DUI del empleado',
+  `emp_nit` CHAR(14) NOT NULL COMMENT 'NIT del empleado',
+  `usr_emp_id` INT NOT NULL,
+  `gen_emp_id` INT NOT NULL,
+  `esp_emp_id` INT NOT NULL,
+  PRIMARY KEY (`emp_id`, `usr_emp_id`, `gen_emp_id`, `esp_emp_id`),
+  INDEX `fk_emp_empleado_usr_usuario1_idx` (`usr_emp_id` ASC),
+  INDEX `fk_emp_empleado_gen_genero1_idx` (`gen_emp_id` ASC),
+  INDEX `fk_emp_empleado_esp_especializaciones1_idx` (`esp_emp_id` ASC),
+  CONSTRAINT `fk_emp_empleado_usr_usuario1`
+    FOREIGN KEY (`usr_emp_id`)
+    REFERENCES `refugio`.`usr_usuario` (`usr_id`)
+    ON DELETE NO ACTION
+    ON UPDATE NO ACTION,
+  CONSTRAINT `fk_emp_empleado_gen_genero1`
+    FOREIGN KEY (`gen_emp_id`)
+    REFERENCES `refugio`.`gen_genero` (`gen_id`)
+    ON DELETE NO ACTION
+    ON UPDATE NO ACTION,
+  CONSTRAINT `fk_emp_empleado_esp_especializaciones1`
+    FOREIGN KEY (`esp_emp_id`)
+    REFERENCES `refugio`.`esp_especializaciones` (`esp_id`)
+    ON DELETE NO ACTION
+    ON UPDATE NO ACTION)
+ENGINE = InnoDB
+COMMENT = 'Datos de empleado del refugio';
+
+
+-- -----------------------------------------------------
+-- Table `refugio`.`doc_doctores`
+-- -----------------------------------------------------
+DROP TABLE IF EXISTS `refugio`.`doc_doctores` ;
+
+CREATE TABLE IF NOT EXISTS `refugio`.`doc_doctores` (
+  `doc_id` INT NOT NULL,
+  `emp_doc_id` INT NOT NULL,
+  `doc_tipo` CHAR(7) NOT NULL COMMENT 'Tipo de doctor (externo/interno)',
+  PRIMARY KEY (`doc_id`, `emp_doc_id`),
+  INDEX `fk_doc_doctores_emp_empleado1_idx` (`emp_doc_id` ASC),
+  CONSTRAINT `fk_doc_doctores_emp_empleado1`
+    FOREIGN KEY (`emp_doc_id`)
+    REFERENCES `refugio`.`emp_empleado` (`emp_id`)
+    ON DELETE NO ACTION
+    ON UPDATE NO ACTION)
+ENGINE = InnoDB
+COMMENT = 'Datos de doctores';
 
 
 SET SQL_MODE=@OLD_SQL_MODE;
