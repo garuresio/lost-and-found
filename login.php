@@ -1,10 +1,3 @@
-<%-- 
-    Document   : index
-    Created on : May 11, 2013, 10:08:20 PM
-    Author     : santiago
---%>
-
-<%@page contentType="text/html" pageEncoding="UTF-8"%>
 <!DOCTYPE html>
 <!--[if lt IE 7 ]> <html lang="en" class="ie6 ielt8"> <![endif]-->
 <!--[if IE 7 ]>    <html lang="en" class="ie7 ielt8"> <![endif]-->
@@ -14,7 +7,7 @@
     <head>
         <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
         <title>Rapido y furioso Car´s</title>
-        <link rel="stylesheet" type="text/css" href="login.css" />
+        <link rel="stylesheet" type="text/css" href="css/login.css" />
     </head>
     <body>
 <div class="container">
